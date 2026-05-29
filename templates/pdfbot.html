@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PDF AI • IntelliChat Pro</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    font-family:Poppins;
+    background:#020617;
+    color:white;
+}
+
+.main{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:40px;
+}
+
+.card{
+    width:100%;
+    max-width:900px;
+    background:rgba(15,23,42,0.85);
+    border-radius:25px;
+    padding:40px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+@media(max-width:768px){
+    .grid{grid-template-columns:1fr;}
+}
+
+.box{
+    background:#0f172a;
+    border:2px dashed #38bdf8;
+    border-radius:20px;
+    padding:30px;
+    text-align:center;
+    cursor:pointer;
+}
+
+input[type="file"]{
+    display:none;
+}
+
+input[type="text"]{
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+}
+
+button{
+    margin-top:20px;
+    width:100%;
+    padding:15px;
+    border:none;
+    background:linear-gradient(to right,#2563eb,#38bdf8);
+    color:white;
+    border-radius:12px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+#result{
+    margin-top:20px;
+    background:#0f172a;
+    padding:20px;
+    border-radius:15px;
+    min-height:80px;
+}
+
+.file-name{
+    margin-top:10px;
+    color:#38bdf8;
+    font-size:14px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="main">
+
+<div class="card">
+
+<h1>📄 PDF AI Analyzer</h1>
+<p>Upload PDF and ask questions about it</p>
+
+<div class="grid">
+
+    <!-- UPLOAD BOX -->
+    <label class="box">
+
+        <i class="fa-solid fa-file-pdf" style="font-size:50px;color:#38bdf8;"></i>
+        <p>Click to Upload PDF</p>
+
+        <input type="file" id="pdfInput" accept="application/pdf">
+
+        <div class="file-name" id="fileName">No file selected</div>
+
+    </label>
+
+    <!-- INFO BOX -->
+    <div class="box">
+
+        <h3>Instructions</h3>
+        <p>Upload a PDF and ask questions like:</p>
+        <p>• Summarize this PDF</p>
+        <p>• What is this document about?</p>
+        <p>• Extract key points</p>
+
+    </div>
+
+</div>
+
+<!-- QUESTION INPUT -->
+<input type="text" id="question"
+placeholder="Ask something about this PDF...">
+
+<!-- BUTTON -->
+<button onclick="analyzePDF()">🔍 Analyze PDF</button>
+
+<!-- RESULT -->
+<div id="result">🧠 AI result will appear here...</div>
+
+</div>
+
+</div>
+
+<script>
+
+// SHOW FILE NAME
+document.getElementById("pdfInput").onchange = function(e){
+
+    let file = e.target.files[0];
+
+    document.getElementById("fileName").innerText =
+        file ? file.name : "No file selected";
+};
+
+// SEND TO BACKEND
+async function analyzePDF(){
+
+    let fileInput = document.getElementById("pdfInput");
+    let question = document.getElementById("question").value;
+
+    if(!fileInput.files[0]){
+        alert("Upload a PDF first");
+        return;
+    }
+
+    document.getElementById("result").innerHTML =
+        "⏳ Analyzing PDF...";
+
+    let formData = new FormData();
+    formData.append("pdf", fileInput.files[0]);
+    formData.append("question", question);
+
+    try{
+
+        let res = await fetch("/pdfbot",{
+            method:"POST",
+            body:formData
+        });
+
+        let data = await res.json();
+
+        document.getElementById("result").innerHTML =
+            "🧠 " + data.response;
+
+    }catch(err){
+
+        document.getElementById("result").innerHTML =
+            "❌ Error connecting to server";
+    }
+}
+
+</script>
+
+</body>
+</html>

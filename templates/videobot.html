@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Video AI • IntelliChat Pro</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    font-family:Poppins;
+    background:#020617;
+    color:white;
+}
+
+/* CENTER CARD */
+.main{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:40px;
+}
+
+.card{
+    width:100%;
+    max-width:900px;
+    background:rgba(15,23,42,0.85);
+    border-radius:25px;
+    padding:40px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+/* GRID */
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+@media(max-width:768px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+
+/* BOX */
+.box{
+    background:#0f172a;
+    border:2px dashed #38bdf8;
+    border-radius:20px;
+    padding:30px;
+    text-align:center;
+    cursor:pointer;
+}
+
+/* VIDEO */
+video{
+    width:100%;
+    margin-top:15px;
+    border-radius:15px;
+    display:none;
+}
+
+/* QUESTION INPUT */
+input{
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+}
+
+/* BUTTON */
+button{
+    margin-top:20px;
+    width:100%;
+    padding:15px;
+    border:none;
+    background:linear-gradient(to right,#2563eb,#38bdf8);
+    color:white;
+    border-radius:12px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+/* RESULT */
+#result{
+    margin-top:20px;
+    background:#0f172a;
+    padding:20px;
+    border-radius:15px;
+    min-height:80px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="main">
+
+<div class="card">
+
+<h1>🎥 Video AI Analyzer</h1>
+<p>Upload video + ask questions about it</p>
+
+<div class="grid">
+
+    <!-- LEFT: UPLOAD -->
+    <label class="box">
+
+        <i class="fa-solid fa-video" style="font-size:50px;color:#38bdf8;"></i>
+        <p>Click to Upload Video</p>
+
+        <input type="file" id="videoInput" accept="video/*">
+
+    </label>
+
+    <!-- RIGHT: PREVIEW -->
+    <div class="box">
+
+        <h3>Preview</h3>
+
+        <video id="preview" controls></video>
+
+        <p id="novideo">No video selected</p>
+
+    </div>
+
+</div>
+
+<!-- QUESTION BOX -->
+<input type="text" id="question"
+placeholder="Ask something about this video... e.g. What is happening?">
+
+<!-- BUTTON -->
+<button onclick="analyzeVideo()">🔍 Analyze Video</button>
+
+<!-- RESULT -->
+<div id="result">🧠 AI result will appear here...</div>
+
+</div>
+
+</div>
+
+<script>
+
+// VIDEO PREVIEW
+document.getElementById("videoInput").onchange = function(e){
+
+    let file = e.target.files[0];
+
+    let video = document.getElementById("preview");
+
+    video.src = URL.createObjectURL(file);
+
+    video.style.display = "block";
+
+    document.getElementById("novideo").style.display = "none";
+};
+
+// SEND TO BACKEND
+async function analyzeVideo(){
+
+    let fileInput = document.getElementById("videoInput");
+    let question = document.getElementById("question").value;
+
+    if(!fileInput.files[0]){
+        alert("Upload video first");
+        return;
+    }
+
+    document.getElementById("result").innerHTML =
+        "⏳ Analyzing video...";
+
+    let formData = new FormData();
+    formData.append("video", fileInput.files[0]);
+    formData.append("question", question);
+
+    try{
+
+        let res = await fetch("/videobot",{
+            method:"POST",
+            body:formData
+        });
+
+        let data = await res.json();
+
+        document.getElementById("result").innerHTML =
+            "🧠 " + data.response;
+
+    }catch(err){
+
+        document.getElementById("result").innerHTML =
+            "❌ Error connecting to server";
+
+    }
+}
+
+</script>
+
+</body>
+</html>

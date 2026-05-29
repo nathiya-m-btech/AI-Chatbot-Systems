@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Image AI • IntelliChat Pro</title>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Poppins',sans-serif;
+            background:#020617;
+            color:white;
+        }
+
+        .bg-glow{
+            position:fixed;
+            width:700px;
+            height:700px;
+            background:radial-gradient(circle,#2563eb55,transparent 70%);
+            top:-200px;
+            right:-100px;
+            z-index:-1;
+            filter:blur(50px);
+        }
+
+        .navbar{
+            width:100%;
+            padding:20px 70px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:rgba(15,23,42,0.85);
+            backdrop-filter:blur(12px);
+            border-bottom:1px solid rgba(255,255,255,0.08);
+        }
+
+        .logo{
+            font-size:28px;
+            font-weight:700;
+            background:linear-gradient(to right,#38bdf8,#2563eb);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        /* MAIN GRID */
+        .main{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:40px;
+        }
+
+        .card{
+            width:100%;
+            max-width:900px;
+            background:rgba(15,23,42,0.85);
+            border-radius:25px;
+            padding:40px;
+            border:1px solid rgba(255,255,255,0.08);
+            box-shadow:0 0 40px rgba(37,99,235,0.2);
+        }
+
+        h1{
+            font-size:32px;
+            margin-bottom:8px;
+        }
+
+        p{
+            color:#94a3b8;
+            margin-bottom:25px;
+        }
+
+        /* GRID BOXES */
+        .grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:25px;
+        }
+
+        @media(max-width:768px){
+            .grid{
+                grid-template-columns:1fr;
+            }
+        }
+
+        /* UPLOAD BOX */
+        .upload-box{
+            border:2px dashed #38bdf8;
+            border-radius:20px;
+            padding:35px;
+            text-align:center;
+            cursor:pointer;
+            background:#0f172a;
+            transition:0.3s;
+        }
+
+        .upload-box:hover{
+            border-color:#2563eb;
+            transform:translateY(-3px);
+        }
+
+        .upload-box i{
+            font-size:50px;
+            color:#38bdf8;
+            margin-bottom:15px;
+        }
+
+        .upload-box input{
+            display:none;
+        }
+
+        /* IMAGE PREVIEW BOX */
+        .preview-box{
+            background:#0f172a;
+            border-radius:20px;
+            padding:20px;
+            border:1px solid rgba(255,255,255,0.08);
+        }
+
+        #preview{
+            width:100%;
+            border-radius:15px;
+            display:none;
+        }
+
+        /* BUTTON */
+        .btn{
+            margin-top:20px;
+            width:100%;
+            padding:15px;
+            border:none;
+            background:linear-gradient(to right,#2563eb,#38bdf8);
+            color:white;
+            border-radius:12px;
+            cursor:pointer;
+            font-size:16px;
+            font-weight:600;
+        }
+
+        .btn:hover{
+            transform:translateY(-2px);
+        }
+
+        /* RESULT BOX */
+        .result-box{
+            margin-top:25px;
+            background:#0f172a;
+            padding:20px;
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,0.08);
+            min-height:80px;
+        }
+
+        .loader{
+            color:#38bdf8;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="bg-glow"></div>
+
+<div class="navbar">
+    <div class="logo">🤖 IntelliChat Pro</div>
+</div>
+
+<div class="main">
+
+    <div class="card">
+
+        <h1>🖼️ Image AI Analyzer</h1>
+        <p>Upload image and AI will analyze & describe it</p>
+
+        <div class="grid">
+
+            <!-- LEFT: UPLOAD -->
+            <label class="upload-box">
+
+                <i class="fa-solid fa-image"></i>
+                <p>Click to Upload Image</p>
+
+                <input type="file" id="imageInput" accept="image/*">
+
+            </label>
+
+            <!-- RIGHT: PREVIEW -->
+            <div class="preview-box">
+
+                <h3>Preview</h3>
+                <br>
+
+                <img id="preview">
+
+                <p id="noimg">No image selected</p>
+
+            </div>
+
+        </div>
+
+        <!-- QUESTION BOX -->
+<div style="margin-top:20px;">
+    <input 
+        type="text" 
+        id="question"
+        placeholder="Ask a question about the image..."
+        style="
+            width:100%;
+            padding:15px;
+            border-radius:12px;
+            border:none;
+            outline:none;
+            background:#0f172a;
+            color:white;
+            border:1px solid rgba(255,255,255,0.1);
+        "
+    >
+</div>
+
+        <button class="btn" onclick="analyzeImage()">
+            🔍 Analyze Image
+        </button>
+
+        <!-- RESULT -->
+        <div class="result-box" id="result">
+            🧠 AI result will appear here...
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.getElementById("imageInput").onchange = function(event){
+
+    let file = event.target.files[0];
+
+    let reader = new FileReader();
+
+    reader.onload = function(e){
+
+        let img = document.getElementById("preview");
+
+        img.src = e.target.result;
+        img.style.display = "block";
+
+        document.getElementById("noimg").style.display = "none";
+    }
+
+    reader.readAsDataURL(file);
+};
+
+async function analyzeImage(){
+
+    let fileInput = document.getElementById("imageInput");
+    let questionInput = document.getElementById("question");
+
+    if(!fileInput.files[0]){
+        alert("Please upload an image first");
+        return;
+    }
+
+    document.getElementById("result").innerHTML =
+        "<span class='loader'>⏳ Analyzing image...</span>";
+
+    let formData = new FormData();
+    formData.append("image", fileInput.files[0]);
+
+    // ✅ ADD THIS LINE (IMPORTANT)
+    formData.append("question", questionInput.value);
+
+    try{
+
+        let res = await fetch("/imagebot",{
+            method:"POST",
+            body:formData
+        });
+
+        let data = await res.json();
+
+        document.getElementById("result").innerHTML =
+            "🧠 " + data.response;
+
+    }catch(err){
+
+        document.getElementById("result").innerHTML =
+            "❌ Error connecting to server";
+    }
+}
+
+</script>
+
+</body>
+</html>
