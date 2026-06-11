@@ -48,6 +48,3 @@ Nathiya M
 
 GitHub:
 https://github.com/nathiya-m-btech
-
-```
-```
